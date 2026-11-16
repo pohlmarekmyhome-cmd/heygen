@@ -1,0 +1,18 @@
+[project]
+name = "heygen-dub"
+version = "0.1.0"
+description = "Translate social videos with HeyGen lip-sync dubbing and burn in captions"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+heygen-dub = "heygen_dub.cli:main"
+
+[tool.setuptools]
+packages = ["heygen_dub"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

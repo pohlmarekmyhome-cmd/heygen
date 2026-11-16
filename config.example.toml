@@ -1,0 +1,65 @@
+# Copy to config.toml and adjust.  The API key is read from the env var below,
+# never from this file.
+
+# Target languages. They must be HeyGen's exact names. Run
+#   python -m heygen_dub languages
+# to print the list your account supports. The source (Slovak) is detected
+# automatically from the audio.
+languages = [
+  "English (United States)",
+  "German (Germany)",
+  "Spanish (Spain)",
+  "French (France)",
+  # Check the exact spelling with `languages` before enabling these:
+  # "Czech (Czechia)",
+  # "Polish (Poland)",
+  # "Hungarian (Hungary)",
+  # "Italian (Italy)",
+  # "Ukrainian (Ukraine)",
+]
+
+[heygen]
+api_key_env = "HEYGEN_API_KEY"
+# "precision" re-renders the speaker's mouth to match the new language (lip-sync).
+# "speed" is faster/cheaper voice dubbing with weaker lip-sync.
+mode = "precision"
+poll_interval_seconds = 30
+timeout_minutes = 120
+
+# Extra fields sent as-is in the create-translation request.
+[heygen.request_options]
+enable_dynamic_duration = true   # let speech run slightly longer/shorter than the original
+speaker_num = 1                  # number of people speaking in the video
+# enable_speech_enhancement = true
+# callback_url = "https://example.com/heygen-webhook"
+
+[output]
+dir = "output"
+burn_captions = true
+crf = 18          # x264 quality (lower = better/larger); 18 is visually lossless
+preset = "medium"
+
+[captions]
+# Sizes are fractions of the video height, so the same style works for
+# 9:16 Reels/TikTok/Shorts and 1:1 / 16:9 posts.
+font = "Inter"
+font_size = 0.04
+bold = true
+uppercase = false
+text_color = "#FFFFFF"
+outline_color = "#000000"
+outline = 0.004
+shadow = 0.0
+box = false               # true = semi-transparent box behind the text instead of an outline
+box_color = "#000000"
+box_opacity = 0.6
+margin_bottom = 0.18      # keep captions above TikTok/Reels buttons and description
+margin_sides = 0.08
+max_chars_per_line = 22      # ~22 fits a 9:16 frame at font_size 0.04; raise for 16:9
+max_lines = 2
+
+# Per-language font overrides for scripts the main font lacks.
+[captions.fonts]
+# "Japanese (Japan)" = "Noto Sans CJK JP"
+# "Arabic (Saudi Arabia)" = "Noto Sans Arabic"
+# "Hindi (India)" = "Noto Sans Devanagari"

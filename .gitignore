@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+output/
+config.toml
+.env
+*.part
+*.part.mp4
