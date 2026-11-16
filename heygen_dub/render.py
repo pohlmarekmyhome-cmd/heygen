@@ -52,3 +52,11 @@ def burn_captions(video: Path, ass_file: Path, output: Path, crf: int = 18, pres
         tmp.unlink(missing_ok=True)
         raise RuntimeError(f"ffmpeg failed for {video}:\n{proc.stderr.strip()}")
     tmp.replace(output)
+
+
+def video_duration(path: Path) -> float:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    return float(out)

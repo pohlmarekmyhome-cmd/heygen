@@ -58,6 +58,12 @@ margin_sides = 0.08
 max_chars_per_line = 22      # ~22 fits a 9:16 frame at font_size 0.04; raise for 16:9
 max_lines = 2
 
+# Word-by-word captions (`caption` command)
+highlight_color = "#FFE14D"   # word currently being spoken
+max_words = 4                 # words on screen at once
+pop = true                    # quick zoom-in when a new phrase appears
+strip_punctuation = true      # hide commas/periods, keep ? and !
+
 # Per-language font overrides for scripts the main font lacks.
 [captions.fonts]
 # "Japanese (Japan)" = "Noto Sans CJK JP"

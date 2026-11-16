@@ -2,6 +2,29 @@
 
 This tool turns a Slovak social-media video that has no captions into one captioned video per target language. Each output has a lip-synced dub made by HeyGen and burned-in captions.
 
+There are two ways to use it:
+
+- **Without paid APIs (recommended):** HeyGen's app or website does the lip-synced dubbing, using your normal subscription. This tool then adds animated word-by-word captions locally, for free. See [Animated captions](#animated-captions-no-paid-apis).
+- **Fully through the HeyGen API:** this needs an API plan. See the sections that follow.
+
+## Animated captions (no paid APIs)
+
+```bash
+pip install faster-whisper numpy        # one-time; the ~1.6 GB speech model downloads on first use
+python -m heygen_dub caption dubbed_en.mp4 dubbed_de.mp4 -o output/captioned
+```
+
+For each video, the tool:
+1. Transcribes the speech with Whisper (`large-v3-turbo`, running locally) and records when each word is spoken.
+2. Writes `output/captioned/<video>/transcript.txt`, one sentence per line.
+3. Shows a few words at a time, highlights the word being spoken, and burns the captions in. The result is `output/captioned/<video>.captioned.mp4`, plus `captions.srt` as a sidecar file.
+
+**Fixing wording:** edit `transcript.txt` (brand names, numbers, misheard words) and run the same command again. It doesn't transcribe again: your corrected text is fitted onto the original word timings. You can also pass the correct translation up front with `--script translation.txt`.
+
+The look is set by `[captions]` in `config.toml`: font, size, colours, `highlight_color`, `max_words`, `uppercase`, `pop`, `box`, and position.
+
+## HeyGen API pipeline
+
 ```
 source.mp4 (Slovak, no captions)
    │  upload (or public URL)

@@ -40,6 +40,14 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("languages", help="list HeyGen's supported target language names")
 
+    c = sub.add_parser("caption", help="add animated word-by-word captions to dubbed videos (local, free)")
+    c.add_argument("videos", nargs="+", type=Path, help="dubbed video files")
+    c.add_argument("-o", "--out", type=Path, default=Path("output/captioned"), help="output folder")
+    c.add_argument("--language", help="spoken language code (en, de, cs, ...); default: auto-detect")
+    c.add_argument("--script", type=Path, help="correct transcript to use for the caption wording")
+    c.add_argument("--model", default="large-v3-turbo", help="faster-whisper model name")
+    c.add_argument("--retranscribe", action="store_true", help="ignore cached word timings")
+
     args = p.parse_args(argv)
     cfg_path = args.config or (DEFAULT_CONFIG if DEFAULT_CONFIG.exists() else None)
     cfg = load_config(cfg_path)
@@ -51,6 +59,21 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         require_ffmpeg()
+
+        if args.cmd == "caption":
+            from .captioner import caption_video
+
+            ok = True
+            for video in args.videos:
+                try:
+                    caption_video(
+                        video, args.out, cfg.captions, language=args.language, script=args.script,
+                        model=args.model, retranscribe=args.retranscribe, crf=cfg.crf, preset=cfg.preset,
+                    )
+                except (RuntimeError, OSError) as e:
+                    log(f"ERROR captioning {video}: {e}")
+                    ok = False
+            return 0 if ok else 1
 
         if args.cmd == "burn":
             job = Job(str(args.job_dir), cfg, job_dir=args.job_dir)

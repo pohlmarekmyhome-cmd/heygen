@@ -32,6 +32,11 @@ class CaptionStyle:
     max_chars_per_line: int = 22
     max_lines: int = 2
     fonts: dict[str, str] = field(default_factory=dict)  # per-language font overrides
+    # Word-by-word ("Captions app" style) options, used by the `caption` command.
+    highlight_color: str = "#FFE14D"  # colour of the word being spoken
+    max_words: int = 4  # words shown at once
+    pop: bool = True  # small zoom-in when a new group of words appears
+    strip_punctuation: bool = True  # drop commas/periods, keep ? and !
 
 
 # ------------------------------------------------------------------------ SRT
@@ -147,8 +152,8 @@ def _ass_escape(text: str) -> str:
     return text.replace("\\", "\\\\").replace("{", "(").replace("}", ")").replace("\n", "\\N")
 
 
-def to_ass(cues: list[Cue], style: CaptionStyle, width: int, height: int, language: str = "") -> str:
-    """Render cues as an ASS script sized in real video pixels."""
+def ass_header(style: CaptionStyle, width: int, height: int, language: str = "") -> str:
+    """ASS script header with one 'Default' style sized in real video pixels."""
     font = style.fonts.get(language, style.font)
     size = round(style.font_size * height)
     if style.box:
@@ -159,8 +164,7 @@ def to_ass(cues: list[Cue], style: CaptionStyle, width: int, height: int, langua
         outline_col, back = _ass_color(style.outline_color), _ass_color("#000000", 0.5)
     margin_v = round(style.margin_bottom * height)
     margin_lr = round(style.margin_sides * width)
-
-    header = f"""[Script Info]
+    return f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {width}
 PlayResY: {height}
@@ -174,10 +178,16 @@ Style: Default,{font},{size},{_ass_color(style.text_color)},&H000000FF,{outline_
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
-    events = []
-    for c in cues:
-        text = c.text.upper() if style.uppercase else c.text
-        events.append(
-            f"Dialogue: 0,{_fmt_ass_ts(c.start)},{_fmt_ass_ts(c.end)},Default,,0,0,0,,{_ass_escape(text)}"
-        )
-    return header + "\n".join(events) + "\n"
+
+
+def dialogue(start: float, end: float, text: str) -> str:
+    return f"Dialogue: 0,{_fmt_ass_ts(start)},{_fmt_ass_ts(end)},Default,,0,0,0,,{text}"
+
+
+def to_ass(cues: list[Cue], style: CaptionStyle, width: int, height: int, language: str = "") -> str:
+    """Render line-level cues as an ASS script sized in real video pixels."""
+    events = [
+        dialogue(c.start, c.end, _ass_escape(c.text.upper() if style.uppercase else c.text))
+        for c in cues
+    ]
+    return ass_header(style, width, height, language) + "\n".join(events) + "\n"
